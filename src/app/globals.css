@@ -138,6 +138,21 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+/* Match ring: nakreslí sa raz pri prvom zobrazení (UI_UX.md — bez opakovania) */
+@keyframes match-ring-draw {
+  from {
+    stroke-dashoffset: var(--ring-circumference);
+  }
+}
+.match-ring-arc {
+  animation: match-ring-draw 600ms ease-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .match-ring-arc {
+    animation: none;
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
