@@ -1,0 +1,25 @@
+# CI: beží automaticky na GitHube pri každom pushi a pull requeste.
+# Ochranná sieť — ak AI (alebo ktokoľvek) rozbije build, GitHub to označí
+# červeným krížikom skôr, než sa kód dostane do nasadenej aplikácie.
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      # Zástupné hodnoty len pre build — skutočné kľúče žijú vo Vercel env vars
+      NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-key-for-ci-build-only
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run check

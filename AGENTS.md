@@ -35,7 +35,35 @@ After every completed task, always write:
 2. What result the owner should expect if it works
 3. What to do if an error appears (at least basic diagnostic steps)
 
+## Workflow & AI-safety rules (protect the code from the AI)
+These rules exist because AI coding agents have known failure modes: silently
+breaking unrelated code, inventing APIs, drifting from the spec, and losing
+context between sessions. Every rule below blocks one of those.
+- **One module = one git branch** (e.g. `m1-database`). Never build a module
+  directly on `main`. Merge to `main` only after the owner has tested and
+  approved. `main` must always be a working app.
+- **Definition of done** for every task — ALL of these, no exceptions:
+  1. `npm run check` passes (typecheck + lint + production build)
+  2. No secrets in code, `.env.local` still gitignored
+  3. Docs updated if schema/decisions/UI changed (the doc IS the spec)
+  4. Plain-language test instructions written for the owner
+- **After the owner verifies a module works, tag it**: `git tag m1-verified`.
+  Tags are permanent restore points — if a later module breaks something,
+  we can always return to the last verified state.
+- Never `git push --force`, never rewrite git history, never delete or
+  weaken a test to make it pass, never commit directly to `main`.
+- Touch only files the task requires. Do not "improve" or reformat
+  unrelated code — small diffs are reviewable diffs.
+- Every new table must have RLS enabled with a policy before the module is
+  considered done (see SECURITY_GDPR.md S1).
+- AI model IDs used by the app are named constants in ONE config file —
+  verify current strings at docs.claude.com at implementation time.
+- The daily cron is a dispatcher that enqueues small batches — never a
+  monolithic loop over all users (REVIEW_NOTES Finding 4).
+
 ## Legal/architectural constraints (do not change without discussion)
+- Read SECURITY_GDPR.md before any module touching user data. RLS on every
+  table, secrets only in env vars, CV bucket private.
 - Scraping is ALWAYS a per-user targeted search (as the user would do it themselves), 
   with deduplication of overlapping queries and short-term (24-48h) caching for 
   internal matching only — NEVER a permanent central copy/archive of the portal's 
