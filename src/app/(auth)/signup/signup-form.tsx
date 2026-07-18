@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useActionState } from "react";
 import { signup, type AuthFormState } from "../actions";
+import { BrandMark } from "@/components/brand-mark";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -21,15 +22,18 @@ export function SignupForm() {
   const [state, formAction, isPending] = useActionState(signup, INITIAL_STATE);
 
   return (
-    <Card className="w-full max-w-sm shadow-soft">
-      <CardHeader>
-        <CardTitle className="text-xl">Vytvorte si účet</CardTitle>
-        <CardDescription>
+    <Card className="w-full max-w-sm shadow-soft [--card-spacing:--spacing(6)]">
+      <CardHeader className="items-center text-center">
+        <BrandMark size={44} className="mx-auto mb-3" />
+        <CardTitle className="text-2xl tracking-tight">
+          Vytvorte si účet
+        </CardTitle>
+        <CardDescription className="text-sm">
           Váš osobný agent začne hľadať pracovné ponuky za vás.
         </CardDescription>
       </CardHeader>
       <form action={formAction}>
-        <CardContent className="grid gap-4">
+        <CardContent className="grid gap-4 pt-2">
           <div className="grid gap-2">
             <Label htmlFor="email">E-mail</Label>
             <Input
@@ -39,6 +43,7 @@ export function SignupForm() {
               autoComplete="email"
               required
               placeholder="vas@email.sk"
+              className="h-10"
             />
           </div>
           <div className="grid gap-2">
@@ -50,6 +55,7 @@ export function SignupForm() {
               autoComplete="new-password"
               required
               minLength={8}
+              className="h-10"
             />
             <p className="text-xs text-ink-muted">Aspoň 8 znakov.</p>
           </div>
@@ -84,13 +90,17 @@ export function SignupForm() {
             </p>
           )}
         </CardContent>
-        <CardFooter className="mt-4 flex-col gap-3">
-          <Button type="submit" className="w-full" disabled={isPending}>
+        <CardFooter className="mt-5 flex-col gap-3">
+          <Button
+            type="submit"
+            className="h-10 w-full text-[0.9rem] shadow-[0_2px_10px_rgb(59_54_224/0.30)] transition-all duration-150 hover:shadow-[0_4px_14px_rgb(59_54_224/0.35)]"
+            disabled={isPending}
+          >
             {isPending ? "Vytváram účet…" : "Zaregistrovať sa"}
           </Button>
           <p className="text-sm text-ink-muted">
             Už máte účet?{" "}
-            <Link href="/login" className="text-primary hover:underline">
+            <Link href="/login" className="font-medium text-primary hover:underline">
               Prihláste sa
             </Link>
           </p>

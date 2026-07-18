@@ -20,7 +20,7 @@ export default async function LoginPage({
   const urlError = error ? URL_ERROR_MESSAGES[error] : undefined;
 
   return (
-    <main className="flex flex-1 items-center justify-center bg-surface-subtle p-4">
+    <main className="flex min-h-screen flex-1 items-center justify-center bg-glow p-4">
       <LoginForm urlError={urlError} />
     </main>
   );

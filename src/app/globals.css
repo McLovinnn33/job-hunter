@@ -138,6 +138,37 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+/* Jemné "svetlo" zhora v indigo odtieni — dáva stránkam hĺbku bez rušenia */
+.bg-glow {
+  background-color: var(--background);
+  background-image: radial-gradient(
+    1100px circle at 50% -220px,
+    rgb(59 54 224 / 0.07),
+    transparent 60%
+  );
+}
+
+/* Pulzujúca bodka "agent žije" — pomalá, nenápadná (UI_UX.md: bez wow efektov) */
+@keyframes status-dot-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.55;
+    transform: scale(0.85);
+  }
+}
+.status-dot {
+  animation: status-dot-pulse 2.4s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .status-dot {
+    animation: none;
+  }
+}
+
 /* Match ring: nakreslí sa raz pri prvom zobrazení (UI_UX.md — bez opakovania) */
 @keyframes match-ring-draw {
   from {
