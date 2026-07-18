@@ -118,6 +118,33 @@ Module M1. `job_postings` and `search_queries` are shared/service-only:
 users can read postings only through their own `matches`. No module that
 adds a table is done until its RLS policy exists and is tested.
 
+## RLS policy list (implemented in `supabase/migrations/0001_initial_schema.sql`)
+
+| Table | select | insert | update | delete |
+|---|---|---|---|---|
+| users | own row | — (auth trigger) | own row | — (account deletion = service, M10/G6) |
+| profiles | own | — (auth trigger) | own | — (cascade with account) |
+| cv_versions | own | own | own | own |
+| job_postings | only via own `matches` row | — service only | — service only | — service only |
+| search_queries | — service only (no policies at all) | — | — | — |
+| scrape_runs | own | — service only | — service only | — service only |
+| matches | own | — service only (pipeline) | — service only | — service only |
+| application_tracker | own | own | own | own |
+| user_feedback | own | own | own | own |
+| blacklisted_companies | own | own | — | own |
+| notification_preferences | own | own | own | own |
+| usage_counters | own | — service only | — service only | — service only |
+
+"own" = `(select auth.uid()) = user_id` (or `= id` for users). "service
+only" = no policy exists, so with RLS enabled the anon/authenticated keys
+get nothing; only server code with the service_role key (never shipped to
+the browser, S3) can touch it.
+
+Additional automation in the migration: `on_auth_user_created` trigger
+creates the `users` + `profiles` rows for every new sign-up (with backfill
+for accounts created before the migration); `updated_at` auto-touch
+triggers on profiles and application_tracker.
+
 ## Note on embeddings
 `profile_embedding` and `job_embedding` are vectors stored via the
 `pgvector` extension in Supabase. The dimension is FIXED at column
