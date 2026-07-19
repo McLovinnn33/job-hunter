@@ -21,6 +21,8 @@
   --shadow-soft:
     0 1px 2px rgb(20 20 26 / 0.05),
     0 8px 24px rgb(20 20 26 / 0.07);
+  /* Jediná easing krivka celej aplikácie (UI_UX.md motion system) */
+  --ease-smooth: cubic-bezier(0.25, 0.1, 0.25, 1);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -165,6 +167,36 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .status-dot {
+    animation: none;
+  }
+}
+
+/* Fade-up vstup: opacity 0→1 + posun hore o 10px, 500ms, raz (motion system).
+   Stagger cez .fade-up-delay-1/2/3 (80ms kroky). */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fade-up {
+  animation: fade-up 500ms var(--ease-smooth) both;
+}
+.fade-up-delay-1 {
+  animation-delay: 80ms;
+}
+.fade-up-delay-2 {
+  animation-delay: 160ms;
+}
+.fade-up-delay-3 {
+  animation-delay: 240ms;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up {
     animation: none;
   }
 }

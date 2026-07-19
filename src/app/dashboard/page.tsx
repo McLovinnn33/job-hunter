@@ -52,7 +52,7 @@ export default async function DashboardPage() {
       </header>
 
       <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-10">
-        <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="animate-fade-up flex flex-wrap items-center justify-between gap-3">
           <h1 className="text-2xl font-semibold tracking-tight text-ink">
             Vaše ponuky
           </h1>
@@ -64,7 +64,7 @@ export default async function DashboardPage() {
         </div>
 
         {/* Prázdny stav = pozvánka, nie ospravedlnenie (UI_UX.md princíp 5) */}
-        <Card className="mt-6 shadow-soft">
+        <Card className="animate-fade-up fade-up-delay-1 mt-6 shadow-soft">
           <CardContent className="flex flex-col items-center px-6 py-14 text-center">
             <div className="flex size-16 items-center justify-center rounded-full bg-primary/8 ring-1 ring-primary/15">
               <svg width="30" height="30" viewBox="0 0 16 16" fill="none" aria-hidden="true">
