@@ -9,7 +9,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -43,7 +42,6 @@ export function SignupForm() {
               autoComplete="email"
               required
               placeholder="vas@email.sk"
-              className="h-10"
             />
           </div>
           <div className="grid gap-2">
@@ -55,7 +53,6 @@ export function SignupForm() {
               autoComplete="new-password"
               required
               minLength={8}
-              className="h-10"
             />
             <p className="text-xs text-ink-muted">Aspoň 8 znakov.</p>
           </div>
@@ -67,7 +64,10 @@ export function SignupForm() {
               type="checkbox"
               className="mt-0.5 size-4 accent-primary"
             />
-            <Label htmlFor="consent" className="text-sm font-normal leading-snug">
+            <Label
+              htmlFor="consent"
+              className="block text-sm font-normal leading-snug"
+            >
               Súhlasím s{" "}
               <Link href="/terms" className="text-primary hover:underline">
                 podmienkami používania
@@ -89,22 +89,16 @@ export function SignupForm() {
               {state.info}
             </p>
           )}
-        </CardContent>
-        <CardFooter className="mt-5 flex-col gap-3">
-          <Button
-            type="submit"
-            className="h-10 w-full text-[0.9rem] shadow-[0_2px_10px_rgb(59_54_224/0.30)] transition-all duration-150 hover:shadow-[0_4px_14px_rgb(59_54_224/0.35)]"
-            disabled={isPending}
-          >
+          <Button type="submit" className="mt-1 w-full" disabled={isPending}>
             {isPending ? "Vytváram účet…" : "Zaregistrovať sa"}
           </Button>
-          <p className="text-sm text-ink-muted">
+          <p className="pb-2 text-center text-sm text-ink-muted">
             Už máte účet?{" "}
             <Link href="/login" className="font-medium text-primary hover:underline">
               Prihláste sa
             </Link>
           </p>
-        </CardFooter>
+        </CardContent>
       </form>
     </Card>
   );

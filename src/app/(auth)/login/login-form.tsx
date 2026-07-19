@@ -9,7 +9,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -43,7 +42,6 @@ export function LoginForm({ urlError }: { urlError?: string }) {
               autoComplete="email"
               required
               placeholder="vas@email.sk"
-              className="h-10"
             />
           </div>
           <div className="grid gap-2">
@@ -54,7 +52,6 @@ export function LoginForm({ urlError }: { urlError?: string }) {
               type="password"
               autoComplete="current-password"
               required
-              className="h-10"
             />
           </div>
           {errorMessage && (
@@ -62,22 +59,16 @@ export function LoginForm({ urlError }: { urlError?: string }) {
               {errorMessage}
             </p>
           )}
-        </CardContent>
-        <CardFooter className="mt-5 flex-col gap-3">
-          <Button
-            type="submit"
-            className="h-10 w-full text-[0.9rem] shadow-[0_2px_10px_rgb(59_54_224/0.30)] transition-all duration-150 hover:shadow-[0_4px_14px_rgb(59_54_224/0.35)]"
-            disabled={isPending}
-          >
+          <Button type="submit" className="mt-1 w-full" disabled={isPending}>
             {isPending ? "Prihlasujem…" : "Prihlásiť sa"}
           </Button>
-          <p className="text-sm text-ink-muted">
+          <p className="pb-2 text-center text-sm text-ink-muted">
             Ešte nemáte účet?{" "}
             <Link href="/signup" className="font-medium text-primary hover:underline">
               Zaregistrujte sa
             </Link>
           </p>
-        </CardFooter>
+        </CardContent>
       </form>
     </Card>
   );
