@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { logout } from "@/app/(auth)/actions";
+import { CvCard } from "./cv-card";
 import { BrandMark } from "@/components/brand-mark";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -25,6 +26,20 @@ export default async function DashboardPage() {
   if (error || !user) {
     redirect("/login");
   }
+
+  // Profil vytvára databázový trigger pri registrácii; ak chýba, UI to zvládne
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("cv_file_url, raw_cv_text, updated_at")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (profileError) {
+    console.error("Načítanie profilu zlyhalo:", profileError.message);
+  }
+
+  const hasCv = Boolean(profile?.cv_file_url);
+  const hasParsedText = Boolean(profile?.raw_cv_text);
 
   return (
     <div className="flex min-h-screen flex-col bg-glow">
@@ -54,7 +69,7 @@ export default async function DashboardPage() {
       <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-10">
         <div className="animate-fade-up flex flex-wrap items-center justify-between gap-3">
           <h1 className="text-2xl font-semibold tracking-tight text-ink">
-            Vaše ponuky
+            Váš profil
           </h1>
           {/* Stav agenta — "viditeľne živý" (UI_UX.md princíp 3) */}
           <span className="inline-flex items-center gap-2 rounded-full bg-surface px-3 py-1.5 text-xs font-medium text-ink-muted shadow-soft ring-1 ring-foreground/5">
@@ -63,11 +78,17 @@ export default async function DashboardPage() {
           </span>
         </div>
 
+        <CvCard
+          hasCv={hasCv}
+          hasParsedText={hasParsedText}
+          updatedAt={profile?.updated_at ?? null}
+        />
+
         {/* Prázdny stav = pozvánka, nie ospravedlnenie (UI_UX.md princíp 5) */}
-        <Card className="animate-fade-up fade-up-delay-1 mt-6 shadow-soft">
-          <CardContent className="flex flex-col items-center px-6 py-14 text-center">
-            <div className="flex size-16 items-center justify-center rounded-full bg-primary/8 ring-1 ring-primary/15">
-              <svg width="30" height="30" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <Card className="animate-fade-up fade-up-delay-2 mt-6 shadow-soft">
+          <CardContent className="flex flex-col items-center px-6 py-12 text-center">
+            <div className="flex size-14 items-center justify-center rounded-full bg-primary/8 ring-1 ring-primary/15">
+              <svg width="26" height="26" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                 <circle
                   cx="8"
                   cy="8"
@@ -80,16 +101,16 @@ export default async function DashboardPage() {
                 />
               </svg>
             </div>
-            <h2 className="mt-5 text-lg font-semibold tracking-tight text-ink">
-              Všetko je pripravené
+            <h2 className="mt-4 text-lg font-semibold tracking-tight text-ink">
+              {hasCv ? "Výborne — životopis máte" : "Začnite životopisom"}
             </h2>
             <p className="mt-2 max-w-md text-sm leading-relaxed text-ink-muted">
-              Váš účet funguje. V ďalšom kroku si vytvoríte profil — nahráte
-              životopis a poviete agentovi, akú prácu hľadáte. Hneď potom začne
-              skenovať pracovné portály za vás.
+              {hasCv
+                ? "Ďalší krok: krátky rozhovor s agentom o tom, akú prácu hľadáte. Hneď potom začne skenovať pracovné portály za vás."
+                : "Nahrajte životopis vyššie. Potom si s agentom povedzte, akú prácu hľadáte, a on začne skenovať pracovné portály za vás."}
             </p>
             <p className="mt-5 rounded-full bg-secondary px-3 py-1 text-xs text-ink-muted">
-              Vytvorenie profilu pribudne v ďalšej verzii aplikácie
+              Rozhovor s agentom pribudne v ďalšej verzii aplikácie
             </p>
           </CardContent>
         </Card>

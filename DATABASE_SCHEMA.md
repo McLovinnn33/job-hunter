@@ -112,6 +112,13 @@ user_id, week, alerts_sent
 
 ---
 
+## Storage (Module M2 — `supabase/migrations/0002_cv_storage.sql`)
+Bucket `cvs`: **private**, 10 MB limit, PDF + DOCX only. Files live at
+`<user_id>/cv.<ext>`; storage RLS restricts every operation to the owner's
+folder. Viewing goes through short-lived signed URLs (120 s) — never public
+links (SECURITY_GDPR S4). `profiles.cv_file_url` stores the storage PATH,
+not a URL.
+
 ## Security note (SECURITY_GDPR S1, REVIEW_NOTES Finding 5)
 Every table gets Row Level Security ENABLED with owner-only policies in
 Module M1. `job_postings` and `search_queries` are shared/service-only:
