@@ -3,12 +3,12 @@
 import Link from "next/link";
 import { useActionState } from "react";
 import { login, type AuthFormState } from "../actions";
+import { BrandMark } from "@/components/brand-mark";
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -23,15 +23,16 @@ export function LoginForm({ urlError }: { urlError?: string }) {
   const errorMessage = state.error ?? (state === INITIAL_STATE ? urlError : undefined);
 
   return (
-    <Card className="w-full max-w-sm shadow-soft">
-      <CardHeader>
-        <CardTitle className="text-xl">Vitajte späť</CardTitle>
-        <CardDescription>
+    <Card className="w-full max-w-sm shadow-soft [--card-spacing:--spacing(6)]">
+      <CardHeader className="items-center text-center">
+        <BrandMark size={44} className="mx-auto mb-3" />
+        <CardTitle className="text-2xl tracking-tight">Vitajte späť</CardTitle>
+        <CardDescription className="text-sm">
           Prihláste sa a pozrite si, čo váš agent našiel.
         </CardDescription>
       </CardHeader>
       <form action={formAction}>
-        <CardContent className="grid gap-4">
+        <CardContent className="grid gap-4 pt-2">
           <div className="grid gap-2">
             <Label htmlFor="email">E-mail</Label>
             <Input
@@ -58,18 +59,16 @@ export function LoginForm({ urlError }: { urlError?: string }) {
               {errorMessage}
             </p>
           )}
-        </CardContent>
-        <CardFooter className="mt-4 flex-col gap-3">
-          <Button type="submit" className="w-full" disabled={isPending}>
+          <Button type="submit" className="mt-1 w-full" disabled={isPending}>
             {isPending ? "Prihlasujem…" : "Prihlásiť sa"}
           </Button>
-          <p className="text-sm text-ink-muted">
+          <p className="pb-2 text-center text-sm text-ink-muted">
             Ešte nemáte účet?{" "}
-            <Link href="/signup" className="text-primary hover:underline">
+            <Link href="/signup" className="font-medium text-primary hover:underline">
               Zaregistrujte sa
             </Link>
           </p>
-        </CardFooter>
+        </CardContent>
       </form>
     </Card>
   );

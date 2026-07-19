@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { LoginForm } from "./login-form";
+import { DotPattern } from "@/components/ui/dot-pattern";
 
 export const metadata: Metadata = {
   title: "Prihlásenie — Job Hunter",
@@ -20,8 +21,17 @@ export default async function LoginPage({
   const urlError = error ? URL_ERROR_MESSAGES[error] : undefined;
 
   return (
-    <main className="flex flex-1 items-center justify-center bg-surface-subtle p-4">
-      <LoginForm urlError={urlError} />
+    <main className="relative flex min-h-screen flex-1 items-center justify-center overflow-hidden bg-glow p-4">
+      {/* Jemná bodková textúra v pozadí (motion system / Firecrawl technika) */}
+      <DotPattern
+        width={22}
+        height={22}
+        cr={1}
+        className="text-ink/10 [mask-image:radial-gradient(720px_circle_at_50%_32%,white,transparent)]"
+      />
+      <div className="relative w-full max-w-sm animate-fade-up">
+        <LoginForm urlError={urlError} />
+      </div>
     </main>
   );
 }

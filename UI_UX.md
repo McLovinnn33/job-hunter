@@ -37,6 +37,38 @@ Signature element:
   Always paired with a text explanation of WHY, even for lower matches
 ```
 
+## Motion system (implemented July 2026 — binding for all modules)
+
+*Technique adopted from Firecrawl's public design system, adapted to our
+brand. Libraries: `motion` (framer-motion) + Magic UI components (installed
+via shadcn CLI). Central config: `src/lib/motion.ts` — components must import
+values from there, never hardcode their own easings/durations.*
+
+```
+Easing: cubic-bezier(0.25, 0.1, 0.25, 1) — the ONLY easing curve in the app
+        (CSS var --ease-smooth, Tailwind class ease-smooth)
+Durations: 200ms quick interactions / 500ms moderate / 1000ms slow
+Patterns:
+  fade-up entrance  — CSS class `animate-fade-up` (+ `fade-up-delay-1/2/3`
+                      for 80ms stagger) on cards/sections at page load;
+                      <FadeUp> component (src/components/motion/fade-up.tsx)
+                      for scroll-triggered cases
+  button-press      — built into Button: scale 0.98 on press, 200ms
+  status-dot        — slow 2.4s pulse, ONLY for the live agent indicator
+  match-ring-draw   — ring draws once on first render, 600ms
+  dot-pattern       — subtle background texture (src/components/ui/
+                      dot-pattern.tsx) with radial mask, auth/hero areas
+Rules:
+  - entrances run ONCE, never loop; no infinite animation on primary content
+  - every pattern has a prefers-reduced-motion fallback (no motion)
+  - animation must never slow perceived speed
+  - rich hover AND focus states on every interactive element
+Sizing (premium scale):
+  - buttons/inputs default 40px tall (h-10), large CTA 44px (h-11) —
+    never the compact 32px scale
+  - primary button: indigo gradient + inset light edge + soft glow shadow
+```
+
 ## UX principles (from research + Apple/Firecrawl direction)
 
 ```

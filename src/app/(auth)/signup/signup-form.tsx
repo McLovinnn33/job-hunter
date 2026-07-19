@@ -3,12 +3,12 @@
 import Link from "next/link";
 import { useActionState } from "react";
 import { signup, type AuthFormState } from "../actions";
+import { BrandMark } from "@/components/brand-mark";
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -21,15 +21,18 @@ export function SignupForm() {
   const [state, formAction, isPending] = useActionState(signup, INITIAL_STATE);
 
   return (
-    <Card className="w-full max-w-sm shadow-soft">
-      <CardHeader>
-        <CardTitle className="text-xl">Vytvorte si účet</CardTitle>
-        <CardDescription>
+    <Card className="w-full max-w-sm shadow-soft [--card-spacing:--spacing(6)]">
+      <CardHeader className="items-center text-center">
+        <BrandMark size={44} className="mx-auto mb-3" />
+        <CardTitle className="text-2xl tracking-tight">
+          Vytvorte si účet
+        </CardTitle>
+        <CardDescription className="text-sm">
           Váš osobný agent začne hľadať pracovné ponuky za vás.
         </CardDescription>
       </CardHeader>
       <form action={formAction}>
-        <CardContent className="grid gap-4">
+        <CardContent className="grid gap-4 pt-2">
           <div className="grid gap-2">
             <Label htmlFor="email">E-mail</Label>
             <Input
@@ -61,7 +64,10 @@ export function SignupForm() {
               type="checkbox"
               className="mt-0.5 size-4 accent-primary"
             />
-            <Label htmlFor="consent" className="text-sm font-normal leading-snug">
+            <Label
+              htmlFor="consent"
+              className="block text-sm font-normal leading-snug"
+            >
               Súhlasím s{" "}
               <Link href="/terms" className="text-primary hover:underline">
                 podmienkami používania
@@ -83,18 +89,16 @@ export function SignupForm() {
               {state.info}
             </p>
           )}
-        </CardContent>
-        <CardFooter className="mt-4 flex-col gap-3">
-          <Button type="submit" className="w-full" disabled={isPending}>
+          <Button type="submit" className="mt-1 w-full" disabled={isPending}>
             {isPending ? "Vytváram účet…" : "Zaregistrovať sa"}
           </Button>
-          <p className="text-sm text-ink-muted">
+          <p className="pb-2 text-center text-sm text-ink-muted">
             Už máte účet?{" "}
-            <Link href="/login" className="text-primary hover:underline">
+            <Link href="/login" className="font-medium text-primary hover:underline">
               Prihláste sa
             </Link>
           </p>
-        </CardFooter>
+        </CardContent>
       </form>
     </Card>
   );
