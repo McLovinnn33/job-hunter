@@ -112,6 +112,13 @@ user_id, week, alerts_sent
 
 ---
 
+## Scraper support (Module M5 — `supabase/migrations/0003_scraper_support.sql`)
+Unique index on `job_postings (source, url)` enables idempotent upserts
+(re-scraped postings refresh `expires_at` instead of duplicating).
+`cleanup_expired_postings()` is a service-only DB function implementing the
+ADR-001 amendment: deletes expired postings NOT referenced by matches or
+application_tracker; scheduled daily from M13's cron.
+
 ## Storage (Module M2 — `supabase/migrations/0002_cv_storage.sql`)
 Bucket `cvs`: **private**, 10 MB limit, PDF + DOCX only. Files live at
 `<user_id>/cv.<ext>`; storage RLS restricts every operation to the owner's
