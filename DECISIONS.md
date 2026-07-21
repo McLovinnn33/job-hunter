@@ -39,6 +39,16 @@ snapshot. This retention rule goes on the lawyer's agenda explicitly:
 **Reason:** Opus/Fable are 5-25x more expensive with no real benefit for these simple, well-scoped production tasks.
 **Note (REVIEW_NOTES Finding 6):** "Haiku"/"Sonnet" here mean the *current* models of that class — exact model ID strings are verified at docs.claude.com at implementation time and declared as named constants in one config file.
 
+## ADR-006 implementation note (Module M3, 2026-07-20)
+Onboarding chat uses `claude-sonnet-5` (current Sonnet-tier model at
+implementation time) via a tool-use flow: the model conducts the
+conversation and calls a `save_preferences` tool once it has enough
+information, which both ends the conversation and returns structured
+data in one step. Model ID lives in `src/lib/ai/config.ts` as the sole
+source of truth (Finding 6). Verified against 5 test personas including
+a prompt-injection attempt (correctly deflected) and a CV-context case
+(correctly avoided re-asking known information).
+
 ## ADR-007: Embedding model choice — PLACEHOLDER, decided at Module M4
 **Decision:** Not yet made. M4 pins the Voyage AI model name, price, and vector dimension (pgvector columns have a fixed dimension — changing it later means re-embedding everything, see REVIEW_NOTES Finding 11).
 **Rule until then:** vector column dimension stays a named constant with a TODO; M1 creates the schema with this constant.

@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { logout } from "@/app/(auth)/actions";
 import { CvCard } from "./cv-card";
+import { OnboardingChat } from "./onboarding-chat";
 import { BrandMark } from "@/components/brand-mark";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
@@ -30,7 +30,7 @@ export default async function DashboardPage() {
   // Profil vytvára databázový trigger pri registrácii; ak chýba, UI to zvládne
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
-    .select("cv_file_url, raw_cv_text, updated_at")
+    .select("cv_file_url, raw_cv_text, updated_at, chat_summary, preferences_json")
     .eq("user_id", user.id)
     .maybeSingle();
 
@@ -40,6 +40,12 @@ export default async function DashboardPage() {
 
   const hasCv = Boolean(profile?.cv_file_url);
   const hasParsedText = Boolean(profile?.raw_cv_text);
+  const preferences = profile?.preferences_json as {
+    keyword: string;
+    location?: string;
+    salaryMin?: number;
+    employmentType?: string;
+  } | null;
 
   return (
     <div className="flex min-h-screen flex-col bg-glow">
@@ -84,36 +90,10 @@ export default async function DashboardPage() {
           updatedAt={profile?.updated_at ?? null}
         />
 
-        {/* Prázdny stav = pozvánka, nie ospravedlnenie (UI_UX.md princíp 5) */}
-        <Card className="animate-fade-up fade-up-delay-2 mt-6 shadow-soft">
-          <CardContent className="flex flex-col items-center px-6 py-12 text-center">
-            <div className="flex size-14 items-center justify-center rounded-full bg-primary/8 ring-1 ring-primary/15">
-              <svg width="26" height="26" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                <circle
-                  cx="8"
-                  cy="8"
-                  r="5.5"
-                  stroke="var(--primary)"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeDasharray="26 9"
-                  transform="rotate(-90 8 8)"
-                />
-              </svg>
-            </div>
-            <h2 className="mt-4 text-lg font-semibold tracking-tight text-ink">
-              {hasCv ? "Výborne — životopis máte" : "Začnite životopisom"}
-            </h2>
-            <p className="mt-2 max-w-md text-sm leading-relaxed text-ink-muted">
-              {hasCv
-                ? "Ďalší krok: krátky rozhovor s agentom o tom, akú prácu hľadáte. Hneď potom začne skenovať pracovné portály za vás."
-                : "Nahrajte životopis vyššie. Potom si s agentom povedzte, akú prácu hľadáte, a on začne skenovať pracovné portály za vás."}
-            </p>
-            <p className="mt-5 rounded-full bg-secondary px-3 py-1 text-xs text-ink-muted">
-              Rozhovor s agentom pribudne v ďalšej verzii aplikácie
-            </p>
-          </CardContent>
-        </Card>
+        <OnboardingChat
+          initialSummary={profile?.chat_summary ?? null}
+          initialPreferences={preferences}
+        />
       </main>
     </div>
   );

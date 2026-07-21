@@ -112,6 +112,14 @@ user_id, week, alerts_sent
 
 ---
 
+## Onboarding chat (Module M3)
+No schema changes — uses existing `profiles.chat_summary` (text) and
+`preferences_json` (jsonb: `{keyword, location, salaryMin, employmentType}`).
+Full conversation transcript is never persisted (GDPR G4/Finding 13) — it
+lives only in the browser's component state during the chat and is resent
+to the server each turn; only the final summary + structured preferences
+are written to `profiles`.
+
 ## Scraper support (Module M5 — `supabase/migrations/0003_scraper_support.sql`)
 Unique index on `job_postings (source, url)` enables idempotent upserts
 (re-scraped postings refresh `expires_at` instead of duplicating).
