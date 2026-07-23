@@ -94,3 +94,10 @@ context between sessions. Every rule below blocks one of those.
 ## Before major decisions
 Check `DECISIONS.md` — if something has already been decided and justified, don't 
 propose changing it without asking why it's that way first.
+
+## Reading list (read before starting any module)
+`AGENTS.md` (this file) → `ROADMAP.md` (current priorities, open findings
+R1–R16, and the safety system) → `DATABASE_SCHEMA.md` → `DECISIONS.md` →
+`SECURITY_GDPR.md` (any module touching user data) → `UI_UX.md` (any module
+with UI) → `REVIEW_NOTES.md` (module cards and the original dependency map).
+ROADMAP.md supersedes REVIEW_NOTES.md wherever the two disagree on ordering.
