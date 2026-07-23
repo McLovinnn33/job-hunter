@@ -43,10 +43,30 @@ context between sessions. Every rule below blocks one of those.
   directly on `main`. Merge to `main` only after the owner has tested and
   approved. `main` must always be a working app.
 - **Definition of done** for every task — ALL of these, no exceptions:
-  1. `npm run check` passes (typecheck + lint + production build)
+  1. `npm run check` passes (typecheck + lint + tests + production build)
   2. No secrets in code, `.env.local` still gitignored
   3. Docs updated if schema/decisions/UI changed (the doc IS the spec)
   4. Plain-language test instructions written for the owner
+  5. Tests exist for the module's core logic (see "Regression safety" below)
+  6. Any new env var is added to Vercel AND the feature is verified on the
+     deployed URL — "works locally" is not done (ROADMAP.md R1)
+
+## Regression safety (ROADMAP.md Part C — these rules exist to stop an AI agent breaking working code)
+- **Never weaken or delete a test to make a change pass.** If a test fails,
+  either the change is wrong or the test's expectation genuinely changed —
+  in the second case, say so explicitly and explain why before editing it.
+- **Every data shape crossing a module boundary** (especially anything
+  stored as `jsonb`) is defined ONCE as a Zod schema in `src/lib/contracts/`
+  and validated at both write and read. Never re-declare the shape locally,
+  never `as SomeType` an unvalidated database value (ROADMAP.md R2).
+- **Touching a file outside the module you were assigned** requires stating
+  what and why FIRST, before editing. No silent cross-module changes.
+- **After any database migration**, run `npm run verify-db` and report the
+  result. Never assume the live schema matches the repo.
+- **Every migration ships with a written "how to undo this"** note in the
+  same file.
+- Prefer adding a new function over editing a shared one used elsewhere;
+  when a shared function must change, list every call site first.
 - **After the owner verifies a module works, tag it**: `git tag m1-verified`.
   Tags are permanent restore points — if a later module breaks something,
   we can always return to the last verified state.
