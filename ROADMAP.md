@@ -179,6 +179,21 @@ day; the owner needs to see cost per user before pricing anything.
 **Fix:** log `input_tokens`/`output_tokens` and the model used for every AI
 call into an `ai_usage` table, from the shared AI wrapper.
 
+#### R17: There is no password reset — a locked-out user is locked out forever
+No forgot-password flow, no reset page, no recovery route exists (`src/app/auth/`
+contains only `callback` and `confirm`). The owner hit this on 22 July and had
+to be logged in via an admin-generated magic link. Every real user who forgets
+their password would be permanently unable to reach their account, CV and
+matches — with no self-service path and no support process to fall back on.
+
+**Fix (small, belongs in Phase 0):** a `/forgot-password` page calling
+`supabase.auth.resetPasswordForEmail()`, a `/reset-password` page handling the
+recovery token, and a "Zabudli ste heslo?" link on the login form. Requires the
+Resend email sender (or Supabase's built-in mailer with its low rate limit) —
+note that "Confirm email" is currently OFF, which does not affect recovery mail.
+Optionally also offer magic-link login, which removes passwords as a failure
+mode entirely.
+
 ### 🟡 Awareness, no action yet
 
 - **R12: No database backup plan.** Supabase's free tier has limited
