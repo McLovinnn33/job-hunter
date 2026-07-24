@@ -24,7 +24,20 @@ export const MAX_ONBOARDING_MESSAGES = 20;
 // Koľko znakov CV textu sa pošle ako kontext (zvyšok by len plytval tokenmi)
 const MAX_CV_CONTEXT_CHARS = 6000;
 
-const client = new Anthropic();
+/**
+ * Klient sa vytvára až pri volaní (nie pri načítaní modulu), aby sa
+ * environment premenné čítali vždy aktuálne — a aby chýbajúci kľúč dal
+ * zrozumiteľnú chybu namiesto kryptickej SDK hlášky.
+ */
+function getClient(): Anthropic {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    throw new Error(
+      "Chýba ANTHROPIC_API_KEY. Lokálne: pridajte ho do .env.local a REŠTARTUJTE `npm run dev`. Na Verceli: Settings → Environment Variables + Redeploy."
+    );
+  }
+  return new Anthropic({ apiKey });
+}
 
 export type ChatMessage = {
   role: "user" | "assistant";
@@ -141,7 +154,7 @@ export async function continueOnboardingChat(
 ): Promise<OnboardingTurnResult> {
   const forceFinish = history.length >= MAX_ONBOARDING_MESSAGES;
 
-  const response = await client.messages.create({
+  const response = await getClient().messages.create({
     model: QUALITY_MODEL,
     max_tokens: 1024,
     thinking: { type: "disabled" },

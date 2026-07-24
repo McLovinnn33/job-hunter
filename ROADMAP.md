@@ -461,6 +461,82 @@ anything for *my* field?"); one CTA repeated, never competing CTAs.
 
 ---
 
+## PART F — Guided candidate profiling (new module M3.5)
+
+*Raised by the owner 24 July after using the M3 chat. The instinct is correct
+and strategically important: the quality of the extracted candidate picture is
+the ceiling on match quality. A thin profile → a thin embedding → mediocre
+matches, no matter how good M8 is. This is worth doing properly.*
+
+### The two problems the owner observed
+
+1. **"Upraviť" resets the chat with no history.** This is by design, not a
+   bug: the transcript is never stored (GDPR G4 / Finding 13 — summary only),
+   so there is nothing to replay. But the *experience* is wrong — "edit" feels
+   like "start over."
+2. **The current M3 extracts too little.** It captures keyword + location +
+   salary + employment type. That is enough to *search*, but far too thin to
+   *match well* or to feel like the product understood the person.
+
+### Why this is its own module, and when it is built
+
+M3.5 is a deliberate upgrade of onboarding from "quick intake" to "guided
+profile builder." **It must be built AFTER the matching-quality spike (Phase
+1), not before** — the spike reveals which candidate signals actually move
+match quality, and those signals define what the profile must extract. Building
+an elaborate questionnaire before knowing what the matcher needs risks
+extracting the wrong things beautifully. Deliver M3.5 **together with the M10
+product-UI pass** (same design sprint, same "build against real data"
+principle), positioned in Phase 2.
+
+### How it should work (industry-standard patterns)
+
+Grounded in current onboarding/profiling practice (progressive profiling,
+structured-plus-conversational hybrid, must-haves vs deal-breakers, show-the-
+picture-back-and-confirm):
+
+1. **Progressive, not a wall of questions.** Ask one or two things at a time;
+   never render a long form. Start searching as soon as a role is known, keep
+   enriching. (Each extra upfront field measurably drops completion.)
+2. **Hybrid: conversation + structured chips.** The chat handles nuance and
+   follow-ups; a structured, directly-editable panel (role, seniority,
+   locations, remote/hybrid/on-site, salary floor, employment type, industries,
+   company size, must-haves, deal-breakers, work-style/values) holds the
+   result. The user can edit either the chips directly OR re-open the chat to
+   refine — "Upraviť" opens the structured panel, not a blank chat.
+3. **Capture the dimensions that actually differentiate a good match**, which
+   the current M3 omits: **deal-breakers** (commute limit, shift work, on-site
+   requirement, specific companies to avoid — already have `blacklisted_companies`),
+   **must-haves** vs nice-to-haves, seniority level, industries/domains of
+   interest, motivation for moving (esp. the passive-candidate segment — see
+   Part E), and work-style/values. Deal-breakers are especially high-signal and
+   cheap to act on (hard filter before AI spend).
+4. **Show the picture back and let them confirm/correct.** The M3 summary card
+   is the seed of this — expand it into the editable structured panel above.
+   Confirmation both improves data and creates a moment of "it gets me."
+5. **Seed re-entry from the existing profile.** When the user returns to refine,
+   the agent opens with what it already knows ("Vidím, že hľadáte financie v
+   Bratislave — čo chcete upraviť?"), never a blank slate. This fixes problem #1
+   without storing the transcript.
+6. **GDPR posture unchanged:** still summary + structured preferences only, no
+   transcript. The structured panel IS the durable, user-visible, editable
+   record — which is also better for the GDPR "rectification" right (G6).
+
+### Schema impact (decide at M3.5, reserve nothing prematurely)
+
+`profiles.preferences_json` already holds arbitrary structure — M3.5 enriches
+the shape (validated by the Zod contract from Part C, layer 2). `blacklisted_companies`
+already exists for one class of deal-breaker. Likely no new tables; confirm when
+building, against what the spike showed the matcher needs.
+
+### Test
+
+A real user completes the guided flow and, reading the resulting structured
+profile back, agrees it captures them well — including at least one nuance
+(a deal-breaker or a must-have) the old keyword-only intake would have missed.
+
+---
+
 ## Immediate next actions
 
 1. Owner: add the two missing environment variables in Vercel (R1).
