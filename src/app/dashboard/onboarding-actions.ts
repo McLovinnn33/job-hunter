@@ -7,6 +7,7 @@ import {
   MAX_ONBOARDING_MESSAGES,
   type ChatMessage,
 } from "@/lib/ai/onboarding";
+import type { CandidatePreferences } from "@/lib/contracts/preferences";
 import { createClient } from "@/lib/supabase/server";
 
 export type OnboardingActionResult =
@@ -14,12 +15,7 @@ export type OnboardingActionResult =
   | {
       ok: true;
       type: "complete";
-      preferences: {
-        keyword: string;
-        location?: string;
-        salaryMin?: number;
-        employmentType?: string;
-      };
+      preferences: CandidatePreferences;
       summary: string;
     }
   | { ok: false; error: string };

@@ -1,6 +1,8 @@
 import "server-only";
 
 import { createServiceClient } from "@/lib/supabase/service";
+import { parsePreferences } from "@/lib/contracts/preferences";
+import { computeExpiresAt } from "./expiry";
 import { profesiaAdapter } from "./adapters/profesia";
 import {
   normalizePreferences,
@@ -22,9 +24,6 @@ import type {
  * 3. všetko zaloguj do scrape_runs (viditeľné v UI aj pre debugging)
  * M6/M7 pridajú ďalšie adaptéry do ACTIVE_ADAPTERS — nič iné sa nemení.
  */
-
-// Ponuky exspirujú 48 h po stiahnutí (ADR-001 amendment)
-const POSTING_TTL_HOURS = 48;
 
 const ACTIVE_ADAPTERS: PortalAdapter[] = [profesiaAdapter];
 
@@ -53,9 +52,7 @@ function toRow(posting: ScrapedPosting): PostingRow {
     posted_date: posting.postedDate,
     description_text: posting.descriptionText,
     scraped_at: now.toISOString(),
-    expires_at: new Date(
-      now.getTime() + POSTING_TTL_HOURS * 60 * 60 * 1000
-    ).toISOString(),
+    expires_at: computeExpiresAt(now),
   };
 }
 
@@ -208,10 +205,13 @@ export async function runSearchForUser(
     throw new Error(`Načítanie profilu zlyhalo: ${error.message}`);
   }
 
-  const prefs = profile?.preferences_json as SearchPreferences | null;
-  if (!prefs?.keyword) {
+  // R2 fix: NEoveréný `as` cast nahradený validáciou cez kontrakt.
+  // Ak M3 niekedy zmení uložený tvar, dostaneme jasnú chybu tu — nie
+  // tiché hľadanie s `undefined` výrazom.
+  const prefs = parsePreferences(profile?.preferences_json);
+  if (!prefs) {
     throw new Error(
-      "Používateľ zatiaľ nemá nastavené preferencie hľadania (vzniknú v module M3 — AI onboarding)."
+      "Používateľ zatiaľ nemá platné preferencie hľadania (vzniknú v module M3 — AI onboarding)."
     );
   }
 

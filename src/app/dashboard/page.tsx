@@ -5,6 +5,7 @@ import { CvCard } from "./cv-card";
 import { OnboardingChat } from "./onboarding-chat";
 import { BrandMark } from "@/components/brand-mark";
 import { Button } from "@/components/ui/button";
+import { parsePreferences } from "@/lib/contracts/preferences";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
@@ -40,12 +41,8 @@ export default async function DashboardPage() {
 
   const hasCv = Boolean(profile?.cv_file_url);
   const hasParsedText = Boolean(profile?.raw_cv_text);
-  const preferences = profile?.preferences_json as {
-    keyword: string;
-    location?: string;
-    salaryMin?: number;
-    employmentType?: string;
-  } | null;
+  // R2 fix: validované cez kontrakt namiesto neovereného `as` castu
+  const preferences = parsePreferences(profile?.preferences_json);
 
   return (
     <div className="flex min-h-screen flex-col bg-glow">

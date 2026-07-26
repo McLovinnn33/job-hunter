@@ -3,6 +3,7 @@
 import { useRef, useState, useTransition } from "react";
 import { sendOnboardingMessage } from "./onboarding-actions";
 import type { ChatMessage } from "@/lib/ai/onboarding";
+import type { CandidatePreferences } from "@/lib/contracts/preferences";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -23,12 +24,8 @@ const EMPLOYMENT_TYPE_LABELS: Record<string, string> = {
   remote: "remote",
 };
 
-type Preferences = {
-  keyword: string;
-  location?: string;
-  salaryMin?: number;
-  employmentType?: string;
-};
+// Tvar preferencií pochádza z jediného kontraktu (rieši R2)
+type Preferences = CandidatePreferences;
 
 export function OnboardingChat({
   initialSummary,

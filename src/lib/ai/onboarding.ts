@@ -2,6 +2,10 @@ import "server-only";
 
 import Anthropic from "@anthropic-ai/sdk";
 import { QUALITY_MODEL } from "./config";
+import {
+  employmentTypeSchema,
+  type CandidatePreferences,
+} from "@/lib/contracts/preferences";
 
 /**
  * Onboarding chat (M3) — konverzačný agent, ktorý zistí, akú prácu
@@ -44,12 +48,8 @@ export type ChatMessage = {
   content: string;
 };
 
-export type OnboardingPreferences = {
-  keyword: string;
-  location?: string;
-  salaryMin?: number;
-  employmentType?: string;
-};
+// Tvar preferencií pochádza z jediného kontraktu (rieši R2)
+export type OnboardingPreferences = CandidatePreferences;
 
 export type OnboardingTurnResult =
   | { type: "message"; assistantText: string }
@@ -180,6 +180,11 @@ export async function continueOnboardingChat(
     if (!keyword || !summary) {
       throw new Error("Agent nevrátil kompletné preferencie. Skúste znova.");
     }
+    // Model môže vrátiť čokoľvek — validujeme cez kontrakt, aby sa do
+    // preferencií nikdy nedostal typ úväzku mimo povolenej množiny.
+    const employmentType = employmentTypeSchema.safeParse(
+      toolInput.employment_type
+    );
     return {
       type: "complete",
       preferences: {
@@ -192,10 +197,7 @@ export async function continueOnboardingChat(
           typeof toolInput.salary_min === "number"
             ? toolInput.salary_min
             : undefined,
-        employmentType:
-          typeof toolInput.employment_type === "string"
-            ? toolInput.employment_type
-            : undefined,
+        employmentType: employmentType.success ? employmentType.data : undefined,
       },
       summary,
     };

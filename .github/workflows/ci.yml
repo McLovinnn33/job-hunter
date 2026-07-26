@@ -22,4 +22,5 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      # npm run check = typecheck + lint + test + build (AGENTS.md definition of done)
       - run: npm run check

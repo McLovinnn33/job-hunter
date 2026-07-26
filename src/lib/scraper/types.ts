@@ -3,14 +3,13 @@
  * M7 Kariéra) implementujú PortalAdapter — jadro sa nemení.
  */
 
-export type JobSource = "profesia" | "worki" | "kariera";
+// Preferencie vyhľadávania majú JEDINÚ definíciu v kontrakte (rieši R2).
+// Importujeme pre lokálne použitie a zároveň re-exportujeme, aby scraper
+// moduly nemali vlastný tvar.
+import type { SearchPreferences } from "@/lib/contracts/preferences";
+export type { SearchPreferences };
 
-// Preferencie vyhľadávania — v M5 zadávané ručne (dev test),
-// od M3 čítané z profiles.preferences_json
-export type SearchPreferences = {
-  keyword: string;
-  location?: string;
-};
+export type JobSource = "profesia" | "worki" | "kariera";
 
 export type ScrapedPosting = {
   source: JobSource;

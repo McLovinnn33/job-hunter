@@ -1,0 +1,42 @@
+<!--
+  Minimálny fixture pre parser Profesia zoznamu (M5). Zámerne NIE je to
+  plný stiahnutý výpis portálu (to by odporovalo "žiadny archív" z ADR-001)
+  — je to ručne zostavená vzorka kopírujúca reálnu štruktúru selektorov,
+  ktoré parser používa. Ak Profesia zmení HTML, canary test (nie tento)
+  to odhalí; tento fixture chráni parser pred MOJIMI regresiami.
+-->
+<ul class="list">
+  <li class="list-row">
+    <h2>
+      <a id="offer5277302" href="/praca/firma-a/O5277302?search_id=abc-123">
+        <span class='title'>Frontend Developer (React / TypeScript)</span>
+      </a>
+    </h2>
+    <span class='employer'>Firma A, s. r. o.</span>
+    <span title="Vajnorská 100, Bratislava" class='job-location'>Bratislava, Slovensko (Job with occasional home office)</span>
+    <span class='label-group'>
+      <a href="/praca/firma-a/O5277302">
+        <span class="label label-bordered green">Od 3 000 EUR/mesiac</span>
+      </a>
+    </span>
+    <div class='list-footer'>
+      <span class='info'><strong>dnes</strong></span>
+    </div>
+  </li>
+  <li class="list-row">
+    <h2>
+      <a id="offer5277303" href="/praca/firma-b/O5277303">
+        <span class='title'>Účtovník, mzdový účtovník</span>
+      </a>
+    </h2>
+    <span class='employer'>Firma B</span>
+    <span class='job-location'>Košice</span>
+    <div class='list-footer'>
+      <span class='info'><strong>pred 3 dňami</strong></span>
+    </div>
+  </li>
+  <li class="list-row">
+    <!-- Riadok bez ponuky (napr. reklama) — parser ho musí preskočiť -->
+    <div class="banner">Reklama</div>
+  </li>
+</ul>
