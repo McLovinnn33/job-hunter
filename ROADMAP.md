@@ -2,8 +2,32 @@
 
 *Fable review session, 22 July 2026. Written after M0, M1, M2, M3, M5 were
 built and verified. Companion to REVIEW_NOTES.md (which was the pre-build
-review). Findings here are numbered R1–R16 to distinguish them from
+review). Findings here are numbered R1–R18 to distinguish them from
 REVIEW_NOTES' Findings 1–18.*
+
+## STATUS (updated 24 July 2026, after the safety-hardening work)
+
+| Finding | Status |
+|---|---|
+| R2 — preferences shape declared 3× + unchecked cast | ✅ **FIXED** — one Zod contract, validated at both ends |
+| R3 — no automated tests | ✅ **FIXED** — Vitest + 34 tests, wired into `npm run check` and CI |
+| R8 — no DB drift detection | ✅ **FIXED** — `npm run verify-db`, incl. RLS check (0004 RPC deployed) |
+| R4 — silent scraper failure | 🟡 **PARTIAL** — fixture tests catch *my* regressions; no canary yet for Profesia-side changes |
+| Layer 6 — reversibility | ✅ **DONE** — tags + ROLLBACK.md |
+| R1 — production env vars missing | ⏸️ **DEFERRED by owner** — working local-only until real users; live site remains non-functional for M3/M5 features |
+| R5 — Vercel IP blocking untested | ⏳ open (Phase 1) |
+| R6 — no production error visibility | ⏳ open (Layer 5) |
+| R7 — incomplete rate limiting | ⏳ open |
+| R9 — `last_active_at` never written | ⏳ open |
+| R11 — no AI cost observability | ⏳ open (Layer 5) |
+| R17 — no password reset flow | ⏳ open |
+| R18 — EU AI Act classification | ⏳ open (legal consult) |
+
+**Audits performed 24 July, all clean:** git history contains no secrets and no
+`.env` file was ever committed (only `.env.example`); no hardcoded credentials
+in `src/`; the service-role key is guarded by `server-only` and used only in
+server modules; auth uses server-verified `getUser()` with defense-in-depth
+(proxy + page-level check); RLS confirmed enabled on all 12 tables.
 
 **Verdict in one paragraph:** The planning discipline on this project is
 genuinely unusual — the six reference documents, the ADR log, and the
@@ -193,6 +217,31 @@ Resend email sender (or Supabase's built-in mailer with its low rate limit) —
 note that "Confirm email" is currently OFF, which does not affect recovery mail.
 Optionally also offer magic-link login, which removes passwords as a failure
 mode entirely.
+
+#### R18: EU AI Act — confirm this product is NOT "high-risk", before Aug 2026
+The AI Act classifies AI used "to analyse and filter job applications, and to
+evaluate candidates" for **recruitment or selection** as high-risk (Annex III).
+Those systems carry heavy obligations: risk management, data governance,
+technical documentation, record-keeping, human-in-the-loop, accuracy and
+robustness requirements.
+
+**Assessment (agent, not legal advice):** Job Hunter is very likely NOT
+high-risk. Annex III targets AI that supports *an employer's* hiring decision —
+screening applicants, ranking candidates, filtering applications. Job Hunter is
+candidate-side: it helps a job seeker discover postings. It makes no decision
+about any person, and no employer uses its output to select anyone.
+SECURITY_GDPR G9 already anticipated this ("likely minimal-risk, but confirm").
+
+**Why it still matters:** the boundary is not self-evident, the penalty for
+getting it wrong is severe, and the timing is now concrete. High-risk
+obligations apply from **2 August 2026** unless the proposed Digital AI Omnibus
+defers them to December 2027 — the deferral is not yet adopted. Either way this
+must be a named agenda item at the Phase 1 legal consult, not an assumption.
+
+Two things already in the design help considerably if the question is ever
+raised: ADR-004's mandatory written reasoning for every match (transparency),
+and the fact that a human always chooses whether to apply (no automated
+decision). Keep both — they are compliance assets, not just UX choices.
 
 ### 🟡 Awareness, no action yet
 
