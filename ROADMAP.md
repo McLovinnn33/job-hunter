@@ -243,6 +243,22 @@ raised: ADR-004's mandatory written reasoning for every match (transparency),
 and the fact that a human always chooses whether to apply (no automated
 decision). Keep both — they are compliance assets, not just UX choices.
 
+#### R19: Unit tests cannot catch bundler-context bugs — cover critical paths with a dev route too
+The 28 July PDF bug (see git history) worked perfectly in a standalone script
+and in unit tests, but failed inside the running app: Next.js bundled
+`pdf-parse` and left its worker file behind. **A whole class of bugs lives in
+the gap between "the function works" and "the function works inside Next.js".**
+
+Mitigation adopted: for critical paths, add a dev-only route that exercises the
+real runtime (`/api/dev/test-pdf` is the first). Unit test = logic; dev route =
+integration. Consider the same for the scraper and, later, the matching call.
+
+Also a copy lesson: the failure surfaced to the user as *"probably a scan —
+upload a Word version"*, i.e. our bug was reported as the user's fault. Error
+messages must distinguish "we failed" from "your input was unusable". Applied
+in `src/lib/cv/extract.ts` (discriminated `reason`), and worth auditing
+elsewhere as features are built.
+
 ### 🟡 Awareness, no action yet
 
 - **R12: No database backup plan.** Supabase's free tier has limited
