@@ -674,6 +674,46 @@ whose scarcest resource is time.
    M3.5 should capture "am I changing field?" explicitly, because it inverts
    how missing experience should be judged.
 
+### Re-run with the owner's REAL profile (28 July) — hypothesis VALIDATED
+
+The earlier runs used a sample CV (a London web developer) that had been
+uploaded during M2 testing, combined with finance preferences — an accidental
+worst case. After fixing the PDF bug and re-uploading the real CV (MSc
+Financial markets and investing, BSc finance and banking, exchanges in Tokyo
+and South Korea; preferences "financie / business / sales", Bratislava), the
+same prompt produced a genuine gradient:
+
+| Metric | Sample-CV run | Real-profile run |
+|---|---|---|
+| Score range | 15–58 | **15–72** (spread 57) |
+| Distribution | 19 stretch / 1 worth | **10 worth / 9 stretch / 1 "strong"** |
+| Reasoning quality | generic mismatch | **cites actual CV details** |
+
+The top matches are defensible: *Privátny bankár* (72) and *Pracovník
+korporátneho úverového oddelenia* (62) both correctly connect the MSc in
+financial markets to the role, and the reasoning references real CV content
+(account management, CRM, sales coordination, internships). **This is the
+product working as designed.** ADR-004's thesis holds.
+
+### Three concrete bugs to fix in M8 (found by this run)
+
+1. **Tier and score can contradict each other.** The lowest-scoring posting
+   (15/100, obvious MLM clickbait) was labelled `strong_match`. The model sets
+   `tier` and `score` as independent fields and they disagreed. **Fix: derive
+   the tier from the score in code, or reject responses where they conflict.**
+   Never let the model emit an inconsistent pair.
+2. **Red-flagged postings must be capped in code, not trusted to the model.**
+   Several MLM listings still received `worth_considering` (42–45) despite the
+   model itself flagging them. **Fix: any posting with a red flag is forced to
+   the lowest tier before display**, regardless of the model's own tier.
+3. **Output needs sanitising.** One reasoning field contained stray markup
+   (`</an_flag>`, `</invoke>`) leaked from the model. **Fix: strip anything
+   tag-shaped from free-text fields before storing/rendering** — this is also
+   a defence-in-depth measure for SECURITY_GDPR S5.
+
+All three are code-level guardrails around the model rather than prompt
+changes — which is the correct place for them.
+
 ### What was NOT proven
 
 The spike used one profile (a web developer pivoting to finance — an unusually
