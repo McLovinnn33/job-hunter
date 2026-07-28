@@ -586,6 +586,86 @@ profile back, agrees it captures them well — including at least one nuance
 
 ---
 
+## PART G — Matching-quality spike: RESULTS (24 July 2026)
+
+*Phase 1's core experiment, run against the real owner profile and 40 real
+Profesia postings (20 scraped for "react", then 20 for the owner's actual
+"financie + Bratislava" preferences). Two prompt variants tested. Total cost
+~$0.21. This is the most important evidence the project has produced.*
+
+### Verdict: the pipeline works; the product thesis needs one adjustment
+
+**The AI evaluation is genuinely good.** The Slovak reasoning is specific,
+cites actual posting content, and is honest about mismatches. Read cold, a
+real job seeker would find it useful. ADR-004's "explain every match, even
+weak ones" is validated — the explanations *are* the value.
+
+**But the naive framing produced an unusable result.** Variant 1 asked, in
+effect, "would an employer hire this person?" — a recruiter's question. Every
+one of 20 finance postings came back `stretch`, with no score spread
+(min 25 / max 35). For a career-changer, that framing says "you are
+unqualified" twenty times. Correct, useless, demoralising.
+
+**Variant 2 reframed to the candidate's question** — "is this posting worth
+*your* attention?" — plus explicit career-pivot handling, a no-invented-salary
+rule, and a scam/MLM red-flag field. Score spread widened from 10 points to
+43 (min 15 / max 58), and the tone became genuinely helpful.
+
+### The finding that changes the product
+
+**18 of 20 postings for "financie, Bratislava" were flagged as junk — and the
+flags were correct.** Six were near-identical listings from one company with
+clickbait titles ("Kariéra bez praxe", "Výsledky bez limitov", "príjem bez
+limitov"), no real job description, a low fixed salary plus uncapped
+"commission" — textbook insurance/MLM recruitment. The model identified the
+pattern with specific evidence, including naming a known MLM network in one
+posting's text. Several other postings had no description at all.
+
+**Implication: the Slovak job market data is noisy, and filtering the noise is
+more valuable than ranking the signal.** The product's sharpest value
+proposition is not "here are jobs you'll love" — it is:
+
+> *"We read 20 postings so you didn't have to. Two are real opportunities;
+> here they are and here's why. The other 18 are recruitment spam — here's
+> how we know."*
+
+No competitor does this for the Slovak market. It is defensible, immediately
+demonstrable, and it directly serves the passive-candidate segment (Part E),
+whose scarcest resource is time.
+
+### Consequent changes to the plan
+
+1. **Promote spam/fake detection to a first-class M8 feature.** It was a
+   secondary `fake_score` field; the spike shows it is closer to the core
+   value. The red-flag output should be user-visible with its reasoning, not
+   just a hidden score.
+2. **Evaluate relative to the batch, not on an absolute scale.** Tiers should
+   distribute within a day's postings, so the user always gets a ranked
+   shortlist rather than twenty identical `stretch` labels.
+3. **Query generation needs to be richer than one keyword.** A single
+   "financie" search surfaced mostly sales/MLM listings. M8 (or a small
+   pre-step) should derive several query variants per profile — this is also
+   the strongest argument yet for **M3.5's** deal-breakers and must-haves
+   (Part F): "no commission-only sales" would have removed 6 of 20 postings
+   before a single AI call.
+4. **The embedding pre-filter is now cost-justified, not just architectural.**
+   Measured: ~$0.0041 per posting evaluated. At 50 postings/user/day that is
+   ~$6/user/month — roughly 60% of a €10 subscription. Evaluating only the
+   top ~10 candidates after an embedding pre-filter (ADR-007, `voyage-4`)
+   brings it to ~$1.20/user/month. **M4 is therefore required before M8 goes
+   to real users**, exactly as REVIEW_NOTES sequenced it.
+5. **Career-pivot handling belongs in the profile, not just the prompt.**
+   M3.5 should capture "am I changing field?" explicitly, because it inverts
+   how missing experience should be judged.
+
+### What was NOT proven
+
+The spike used one profile (a web developer pivoting to finance — an unusually
+hard case) and one portal. It shows the mechanism works and surfaces the noise
+problem; it does not yet show match quality for a candidate staying in their
+field, which is the more common case. **Re-run the spike with a second, non-
+pivot profile before finalising the M8 prompt.**
+
 ## Immediate next actions
 
 1. Owner: add the two missing environment variables in Vercel (R1).
