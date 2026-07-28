@@ -1,44 +1,24 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import {
+  extractCvText,
+  DOCX_MIME,
+  PDF_MIME,
+} from "@/lib/cv/extract";
 import { createClient } from "@/lib/supabase/server";
 
 // Limity ako pomenované konštanty (AGENTS.md: žiadne magické čísla)
 const MAX_CV_FILE_SIZE_MB = 10;
 const MAX_CV_FILE_SIZE_BYTES = MAX_CV_FILE_SIZE_MB * 1024 * 1024;
-// Ak extrakcia vráti menej znakov, PDF je pravdepodobne sken/obrázok
-const MIN_PARSED_TEXT_CHARS = 100;
 // Podpísaný odkaz na zobrazenie CV platí 2 minúty (S4)
 const SIGNED_URL_EXPIRY_SECONDS = 120;
-
-const PDF_MIME = "application/pdf";
-const DOCX_MIME =
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
 export type CvUploadState = {
   error?: string;
   warning?: string;
   success?: string;
 };
-
-async function extractText(
-  buffer: Buffer,
-  mimeType: string
-): Promise<string> {
-  if (mimeType === PDF_MIME) {
-    const { PDFParse } = await import("pdf-parse");
-    const parser = new PDFParse({ data: new Uint8Array(buffer) });
-    try {
-      const result = await parser.getText();
-      return (result.text ?? "").trim();
-    } finally {
-      await parser.destroy();
-    }
-  }
-  const { default: mammoth } = await import("mammoth");
-  const result = await mammoth.extractRawText({ buffer });
-  return (result.value ?? "").trim();
-}
 
 export async function uploadCv(
   _prevState: CvUploadState,
@@ -74,14 +54,8 @@ export async function uploadCv(
   const buffer = Buffer.from(await file.arrayBuffer());
 
   // 1) Extrakcia textu — robíme ju PRED uložením, aby sme vedeli varovať
-  let parsedText = "";
-  let parseFailed = false;
-  try {
-    parsedText = await extractText(buffer, file.type);
-  } catch (e) {
-    console.error("Extrakcia textu z CV zlyhala:", e);
-    parseFailed = true;
-  }
+  const extraction = await extractCvText(buffer, file.type);
+  const parsedText = extraction.ok ? extraction.text : "";
 
   // 2) Uloženie súboru do privátneho bucketu (cesta = <user_id>/nazov)
   const extension = file.type === PDF_MIME ? "pdf" : "docx";
@@ -119,11 +93,19 @@ export async function uploadCv(
 
   revalidatePath("/dashboard");
 
-  // UI_UX.md: chyby/varovania = čo sa stalo + čo robiť
-  if (parseFailed || parsedText.length < MIN_PARSED_TEXT_CHARS) {
+  // UI_UX.md: chyby/varovania = čo sa stalo + čo robiť.
+  // Rozlišujeme NAŠU chybu od skenovaného PDF — používateľa nesmieme posielať
+  // konvertovať súbor, keď je problém na našej strane (bug 28.7.2026).
+  if (!extraction.ok) {
+    if (extraction.reason === "error") {
+      return {
+        warning:
+          "Súbor je uložený, ale text sa nepodarilo prečítať kvôli technickej chybe na našej strane — nie je to chyba vášho súboru. Už o tom vieme; skúste to prosím o chvíľu znova.",
+      };
+    }
     return {
       warning:
-        "Súbor je uložený, ale nepodarilo sa z neho prečítať text — pravdepodobne je to sken alebo obrázkové PDF. Agent potrebuje text: skúste nahrať verziu exportovanú z Wordu alebo iného editora.",
+        "Súbor je uložený, ale nenašli sme v ňom žiadny text — pravdepodobne ide o sken alebo fotku. Agent potrebuje text: skúste životopis znova vyexportovať ako PDF z Wordu, Google Docs alebo Canvy (nie odfotiť či naskenovať).",
     };
   }
 

@@ -8,7 +8,12 @@ import { resolve } from "path";
  */
 export default defineConfig({
   resolve: {
-    alias: { "@": resolve(__dirname, "./src") },
+    alias: {
+      "@": resolve(__dirname, "./src"),
+      // "server-only" je iba strážca pre Next.js bundler; v testoch ho
+      // nahradíme prázdnym modulom, aby sa serverové moduly dali testovať.
+      "server-only": resolve(__dirname, "./tests/stubs/server-only.ts"),
+    },
   },
   test: {
     include: ["src/**/*.test.ts", "tests/**/*.test.ts"],
