@@ -44,3 +44,8 @@ next-env.d.ts
 
 # lokalne nastavenia Claude Code
 .claude/settings.local.json
+
+# Osobné súbory (životopisy) nepatria do gitu
+CV/
+*.pdf
+!tests/fixtures/*.pdf
