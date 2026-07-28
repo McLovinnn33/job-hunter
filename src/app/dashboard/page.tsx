@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { logout } from "@/app/(auth)/actions";
+import { AgentActivity, type ScrapeRunInfo } from "./agent-activity";
 import { CvCard } from "./cv-card";
+import { MatchList, type MatchItem } from "./match-list";
 import { OnboardingChat } from "./onboarding-chat";
 import { BrandMark } from "@/components/brand-mark";
 import { Button } from "@/components/ui/button";
@@ -43,6 +45,69 @@ export default async function DashboardPage() {
   const hasParsedText = Boolean(profile?.raw_cv_text);
   // R2 fix: validované cez kontrakt namiesto neovereného `as` castu
   const preferences = parsePreferences(profile?.preferences_json);
+
+  // Zhody + ponuky. RLS zabezpečí, že vidíme len vlastné riadky; ponuku
+  // používateľ vidí LEN cez vlastný match (politika job_postings).
+  const { data: matchRows, error: matchesError } = await supabase
+    .from("matches")
+    .select(
+      "id, match_score, match_tier, ai_reasoning, red_flag, job_posting_id, job_postings (id, title, company, location, salary, url, source)"
+    )
+    .eq("user_id", user.id)
+    .order("match_score", { ascending: false });
+
+  if (matchesError) {
+    console.error("Načítanie zhôd zlyhalo:", matchesError.message);
+  }
+
+  const { data: feedbackRows } = await supabase
+    .from("user_feedback")
+    .select("job_posting_id, feedback_type")
+    .eq("user_id", user.id);
+  const feedbackByPosting = new Map(
+    (feedbackRows ?? []).map((f) => [
+      f.job_posting_id as string,
+      f.feedback_type as MatchItem["feedback"],
+    ])
+  );
+
+  const matches: MatchItem[] = (matchRows ?? [])
+    .filter((m) => m.job_postings)
+    .map((m) => {
+      const posting = m.job_postings as unknown as {
+        id: string;
+        title: string;
+        company: string | null;
+        location: string | null;
+        salary: string | null;
+        url: string;
+        source: string;
+      };
+      return {
+        id: m.id as string,
+        score: Number(m.match_score ?? 0),
+        tier: m.match_tier as MatchItem["tier"],
+        reasoning: (m.ai_reasoning as string) ?? "",
+        redFlag: (m.red_flag as string | null) ?? null,
+        feedback: feedbackByPosting.get(posting.id) ?? null,
+        posting,
+      };
+    });
+
+  // Aktivita agenta (Finding 8) — posledné behy + koľko ponúk je platných
+  const { data: runRows } = await supabase
+    .from("scrape_runs")
+    .select("status, started_at, finished_at, postings_found")
+    .eq("user_id", user.id)
+    .order("started_at", { ascending: false })
+    .limit(3);
+
+  const runs: ScrapeRunInfo[] = (runRows ?? []).map((r) => ({
+    status: r.status as ScrapeRunInfo["status"],
+    startedAt: r.started_at as string,
+    finishedAt: (r.finished_at as string | null) ?? null,
+    postingsFound: (r.postings_found as number | null) ?? null,
+  }));
 
   return (
     <div className="flex min-h-screen flex-col bg-glow">
@@ -91,6 +156,10 @@ export default async function DashboardPage() {
           initialSummary={profile?.chat_summary ?? null}
           initialPreferences={preferences}
         />
+
+        <MatchList matches={matches} />
+
+        <AgentActivity runs={runs} freshPostings={matches.length} />
       </main>
     </div>
   );
