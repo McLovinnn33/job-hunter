@@ -1,0 +1,24 @@
+# Store everything with LF. Work is split between a Windows PC and a Mac;
+# without this, every file touched on the other machine shows as fully
+# rewritten in git.
+* text=auto eol=lf
+
+# These MUST be LF or they break on Linux/macOS (CI, Vercel builds)
+*.sh text eol=lf
+
+# Binary — never touch
+*.jpg   binary
+*.jpeg  binary
+*.png   binary
+*.webp  binary
+*.avif  binary
+*.gif   binary
+*.ico   binary
+*.woff2 binary
+*.pdf   binary
+*.docx  binary
+*.zip   binary
+
+# Generated — collapse in diffs and reviews
+package-lock.json    -diff linguist-generated
+tsconfig.tsbuildinfo -diff linguist-generated
